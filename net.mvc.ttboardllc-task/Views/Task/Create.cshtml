@@ -1,0 +1,57 @@
+﻿@model net.mvc.ttboardllc_task.Models.Task
+
+@{
+    Layout = "../Index/_Layout.cshtml";
+}
+
+@*<script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>*@
+@*<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>*@
+
+<h2>Создание задачи</h2>
+
+@using (Html.BeginForm("Create", "Task", FormMethod.Post, new { @class = "small-form" }))
+{
+    /* back-button */
+    if (ViewBag.callback == "tasklist")
+    {
+        @Html.ActionLink("Назад", "List", "Task")
+    }
+    else if (ViewBag.callback == "checklist")
+    {
+        @Html.ActionLink("Назад", "List", "CheckList")
+    }
+
+    /* main-form */
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Title)
+        @Html.EditorFor(model => model.Title)
+        @Html.ValidationMessageFor(model => model.Title)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Description)
+        @Html.EditorFor(model => model.Description)
+        @Html.ValidationMessageFor(model => model.Description)
+    </div>
+
+    <div class="form-group">
+        <select name="Status">
+            @foreach (var status in @ViewBag.statuses)
+            {
+                <option value="@status.Id">@status.Name</option>
+            }
+        </select>
+    </div>
+
+    if (@ViewBag.callback != "tasklist" && @ViewBag.callback != "checklist")
+    {
+        <input type="hidden" name="callback" value="@ViewBag.callback" />
+    }
+
+    <div class="control-group">
+        <input type="submit" class="btn btn-primary" value="Сохранить"/>
+    </div>
+}

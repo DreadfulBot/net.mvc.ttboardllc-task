@@ -1,0 +1,31 @@
+﻿@model net.mvc.ttboardllc_task.Models.CheckListViewModel
+
+@using GridMvc.Html
+@using WebGrease.Css.Extensions
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Index/_Layout.cshtml";
+}
+
+<h2>Листинг чеклиста</h2>
+
+@Html.Grid(Model.Checklists).Columns(columns =>
+{
+    columns.Add(c => c.Id).Titled(Model.Labels["Id"]).Filterable(true).SetWidth(30);
+    columns.Add(c => c.Title).Titled(Model.Labels["Title"]).Filterable(true);
+    columns.Add(c => Model.Statuses.First(p => p.Id == c.Status).Name).Titled(Model.Labels["Status"]).Filterable(true);
+    columns.Add()
+        .Encoded(false)
+        .Sanitized(false)
+        .SetWidth(30)
+        .RenderValueAs(o => Html.ActionLink("Подробнее..", "Edit", new { id = o.Id, callback = "checklist" }))
+        .Titled("Возможные действия");
+    columns.Add()
+        .Encoded(false)
+        .Sanitized(false)
+        .SetWidth(30)
+        .RenderValueAs(o => "<select class=\"checklist-status-selector\" id=\"" + o.Id + "\">" + string.Join(" ", Model.Statuses.Select(s => "<option value = \"" + s.Id + "\">" + s.Name + "</option>")) + "</select>")
+        .Titled("Изменить статус задания");
+}).WithPaging(10).Sortable(true)
+
+@Html.ActionLink("Создать", "Create", new { callback = "checklist" })

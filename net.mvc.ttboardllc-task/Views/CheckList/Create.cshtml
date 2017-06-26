@@ -1,0 +1,55 @@
+﻿@using GridMvc.Html
+@model net.mvc.ttboardllc_task.Models.CheckListCreateViewModel
+
+@{
+    Layout = "../Index/_Layout.cshtml";
+}
+
+<h2>Создание чеклиста</h2>
+
+@*<script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>*@
+@*<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>*@
+
+@using (Html.BeginForm("Create", "CheckList", FormMethod.Post, new { @class = "small-form" }))
+{
+    /* back-button */
+    if (Model.Callback == "tasklist")
+    {
+        @Html.ActionLink("Назад", "List", "Task")
+    }
+    else if (Model.Callback == "checklist")
+    {
+        @Html.ActionLink("Назад", "List", "CheckList")
+    }
+
+    /* main-form */
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Checklist.Title)
+        @Html.EditorFor(model => model.Checklist.Title)
+        @Html.ValidationMessageFor(model => model.Checklist.Title)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Checklist.Description)
+        @Html.EditorFor(model => model.Checklist.Description)
+        @Html.ValidationMessageFor(model => model.Checklist.Description)
+    </div>
+
+    <div class="form-group">
+        <select name="Checklist.Status">
+            @foreach (var status in Model.Statuses)
+            {
+                <option value="@status.Id">@status.Name</option>
+            }
+        </select>
+    </div>
+
+    <hr/>
+
+    <div class="control-group">
+        <input type="submit" class="btn btn-primary" value="Сохранить" />
+    </div>
+}

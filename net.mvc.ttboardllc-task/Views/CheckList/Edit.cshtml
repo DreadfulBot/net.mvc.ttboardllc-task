@@ -1,0 +1,122 @@
+﻿@using GridMvc.Html
+@model net.mvc.ttboardllc_task.Models.CheckListEditViewModel
+
+@{
+    Layout = "../Index/_Layout.cshtml";
+}
+
+<h2>Изменение чеклиста</h2>
+
+@if (Model == null)
+{
+    <p>В ходе исполнения возникла ошибка</p>
+}
+else
+{
+    using (Html.BeginForm("Edit", "CheckList", FormMethod.Post, new { @class = "small-form" }))
+    {
+        /* back-button */
+        if (Model.Callback == "tasklist")
+        {
+            @Html.ActionLink("Назад", "List", "Task")
+        }
+        else if (Model.Callback == "checklist")
+        {
+            @Html.ActionLink("Назад", "List", "CheckList")
+        }
+
+        /* main-form */
+        @Html.ValidationSummary(true)
+        @Html.AntiForgeryToken()
+
+        @Html.HiddenFor(model => model.CheckList.Id)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CheckList.Title)
+            @Html.EditorFor(model => model.CheckList.Title)
+            @Html.ValidationMessageFor(model => model.CheckList.Title)
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CheckList.Description)
+            @Html.EditorFor(model => model.CheckList.Description)
+            @Html.ValidationMessageFor(model => model.CheckList.Description)
+        </div>
+
+        <hr />
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CheckList.CreatedAt)
+            @*@Html.TextBoxFor(model => model.Task.CreatedAt)*@
+            @Html.TextBoxFor(model => model.CheckList.CreatedAt, new { @readonly = "readonly", data_val = "false" })
+            @Html.ValidationMessageFor(model => model.CheckList.CreatedAt)
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.CheckList.ModifiedAt)
+            @*@Html.TextBoxFor(model => model.Task.ModifiedAt)*@
+            @Html.TextBoxFor(model => model.CheckList.ModifiedAt, new { @readonly = "readonly", data_val = "false" })
+            @Html.ValidationMessageFor(model => model.CheckList.ModifiedAt)
+        </div>
+
+        <div class="form-group">
+            <select name="CheckList.Status">
+                @foreach (var status in Model.Statuses)
+                {
+
+                    if (status.Id == Model.CheckList.Status)
+                    {
+                        <option value="@status.Id" selected>@status.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@status.Id">@status.Name</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="control-group">
+            <input type="submit" class="btn btn-primary" value="Сохранить" />
+        </div>
+    }
+
+    using (Html.BeginForm("Delete", "CheckList", FormMethod.Post, new { @class = "small-form" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" value="@Model.CheckList.Id" name="Id" />
+
+        <div class="control-group">
+            <input type="submit" class="btn btn-primary" value="Удалить" />
+        </div>
+    }
+
+    // форма с выводом чеклиста
+    <div class="small-form">
+        <h3>Подзадачи чек-листа</h3>
+
+        @Html.Grid(Model.CheckList.Tasks).Columns(columns =>
+        {
+            columns.Add()
+                .Encoded(false)
+                .Sanitized(false)
+                .RenderValueAs(c =>
+                {
+                    var isChecked = Model.CheckList.Checks.Where(q => q.Key == c.Id).Select(g => g.Value).First();
+                    var result = $"<input class=\"checklist-checkbox\" type=\"checkbox\" value=\"{c.Id}\" id=\"{Model.CheckList.Id}\"";
+                    if (isChecked)
+                        result += " checked />";
+                    else
+                        result += ">";
+
+                    return result;
+                });
+            columns.Add(c => c.Id).Titled(Model.Labels["Id"]).Filterable(true).SetWidth(30);
+            columns.Add(c => c.Title).Titled(Model.Labels["Title"]).Filterable(true);
+            columns.Add(c => Model.Statuses.First(p => p.Id == c.Status).Name).Titled(Model.Labels["Status"]).Filterable(true);
+        })
+
+        @Html.ActionLink("Добавить новую подзадачу", "Create", "Task", new {callback = "/CheckList/AddLastTask?checkListId=" + Model.CheckList.Id}, null)
+    </div>
+    
+}
+
